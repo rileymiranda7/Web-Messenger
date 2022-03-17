@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<script src="https://udayton-cloud.bitbucket.io./clock.js"></script>
+<script src="https://code.jquery.com/jquery-3.5.1.min.js" crossorigin="anonymous"></script>
+<link rel="stylesheet"
+href=https://udayton-cloud.bitbucket.io/style1.css>
+<style>
+    .button {
+        background-color: #4CAF50;
+        border: none;
+        color: white;
+        padding: 5px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 12px;
+        margin: 4px 2px;
+        cursor: pointer;
+    }
+    .round {border-radius: 8px;}
+    #response {background-color: #ff9800;}
+</style>
+<head>
+    <meta charset="utf-8">
+    <title>CCA-Webchat Server</title>
+    <!--NEW-->
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        //connect to server
+        var socketio = io();
+        //send message
+        function send() {
+            var input = $("#data").val();
+            if (input.length == 0) return;
+            socketio.emit("message", input); // Calls "message" event handler in index.js => input is sent back as message from client
+            $("#data").val(""); 
+        }
+        // listen to "message" event and display data sent
+        socketio.on("message", (data) => { // "message" event sent from server => set html element to data and put newline
+            $("#response").append(data + "<br>"); // new line for each message sent
+        });
+        // listen to "typing" event and display received data
+        /*socketio.on("typing", function(data) { // Result of "typing" event emitted below in <input> to server is sent back here to display result
+            $("#typing").html(data); // data is `$(socketclient.id} is typing...`
+            setTimeout(()=>{$("#typing").html("<br>")},500); // set typing div to newline every 500ms
+            //clear the "typing" message after 0.5s to make it look real-time,
+            //otherwise it is displayed forever
+        })*/
+        // call send() if Enter key is pressed
+        function checkEnter(event) {
+            if (event.keyCode == 13) send();
+        }
+
+        // listen to "online" event and update "online" content
+        socketio.on("online", (data) => {
+            $("#online").html(data + "<br>");
+        });
+    </script>
+</head>
+<body>
+    <div class="container wrapper">
+        <div id="top">
+            <h1>Cloud Computing and Applications - Lab 4 A WebChat System</h1>
+    <h2>By Riley Miranda</h2>
+    <div id="email" onclick="showhideEmail()">Show my email</div>
+    <script src="email.js"></script>
+        </div>
+        <div class="wrapper">
+            <div id="menubar">
+                <!--menubar content goes here-->
+            </div>
+            <div id="main">
+                <p>Just a demo HTML page.</p>
+
+    <div id="mydiv"
+        onclick="document.getElementById('mydiv').innerHTML= 'Clicked time: ' + Date()">
+        Click here for current time<br></div>
+
+    <div id="digit-clock"></div>
+    <script>
+    function displayTime() {
+        document.getElementById('digit-clock').innerHTML = "Current time: " + new Date();
+    }
+    setInterval(displayTime, 500);
+    </script>
+
+    <canvas id="analog-clock" width="150" height="150" style="background-color:#999"></canvas>
+    <script>
+    var canvas = document.getElementById("analog-clock");
+    var ctx = canvas.getContext("2d");
+    var radius = canvas.height / 2;
+    ctx.translate(radius, radius);
+    radius = radius * 0.90;
+    setInterval(drawClock, 1000);
+    
+    function drawClock() {
+        drawFace(ctx, radius);
+        drawNumbers(ctx, radius);
+        drawTime(ctx, radius);
+    }
+    </script>
+    
+        Chat message: 
+        <input name="data" onkeypress="checkEnter(event)" 
+            onkeyup="socketio.emit('typing')" id="data"> <!--Shows every time user presses key-->
+        <input class="button round" type="button" value="Send" onclick="send()">
+    <div id="typing"></div> <!--div for 'is typing' alert-->
+    <div id="online"></div> <!--div for 'connected/disconnected alert'-->
+    <div id="response"></div>
+            </div>
+        </div>
+    </div>
+
+    
+</body>
+</html>
